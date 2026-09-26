@@ -1,11 +1,11 @@
-import { generateStructured } from "@/lib/llm";
+import { generateStructured, type LlmContext } from "@/lib/llm";
 import { SUGGEST_INSTRUCTIONS } from "@/lib/prompts";
 import { suggestionSchema, type Analysis, type Suggestion, type VerifiedClause } from "@/lib/schemas";
 
 export function makeSuggestions(
   analysis: Analysis,
   clauses: VerifiedClause[],
-  abortSignal?: AbortSignal,
+  ctx: LlmContext,
 ): Promise<Suggestion> {
   const verified = clauses.filter((c) => c.verified);
   const clauseText = verified.length
@@ -26,6 +26,6 @@ ${clauseText}`;
     schema: suggestionSchema,
     instructions: SUGGEST_INSTRUCTIONS,
     prompt,
-    abortSignal,
+    ctx,
   });
 }

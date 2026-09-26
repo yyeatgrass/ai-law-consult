@@ -1,4 +1,4 @@
-import { generateStructured } from "@/lib/llm";
+import { generateStructured, type LlmContext } from "@/lib/llm";
 import { MAP_INSTRUCTIONS } from "@/lib/prompts";
 import { mappingSchema, type Analysis, type MappedClause } from "@/lib/schemas";
 import type { Clause } from "@/lib/search/clauses";
@@ -6,7 +6,7 @@ import type { Clause } from "@/lib/search/clauses";
 export async function mapToClauses(
   analysis: Analysis,
   clauses: Clause[],
-  abortSignal?: AbortSignal,
+  ctx: LlmContext,
 ): Promise<{ clauses: MappedClause[]; gaps: string[] }> {
   if (clauses.length === 0) return { clauses: [], gaps: analysis.legalIssues };
 
@@ -32,6 +32,6 @@ ${clauseList}`;
     instructions: MAP_INSTRUCTIONS,
     prompt,
     reasoning: true,
-    abortSignal,
+    ctx,
   });
 }

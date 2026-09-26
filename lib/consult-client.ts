@@ -1,4 +1,7 @@
+import { KEY_HEADERS, loadStoredKeys } from "@/lib/api-keys";
 import type { ConsultRequest, ConsultResult, StageEvent } from "@/lib/schemas";
+
+export class MissingKeysError extends Error {}
 
 type Handlers = {
   onStage: (event: StageEvent) => void;
@@ -7,15 +10,21 @@ type Handlers = {
 
 /** Reads the AI SDK UI message stream (SSE) emitted by /api/consult. */
 export async function consult(body: ConsultRequest, handlers: Handlers, signal?: AbortSignal) {
+  const keys = loadStoredKeys();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (keys.deepseek) headers[KEY_HEADERS.deepseek] = keys.deepseek;
+  if (keys.tavily) headers[KEY_HEADERS.tavily] = keys.tavily;
+
   const res = await fetch("/api/consult", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
     signal,
   });
   if (!res.ok || !res.body) {
     const data = await res.json().catch(() => null);
-    throw new Error(data?.error ?? `请求失败（${res.status}）`);
+    const message = data?.error ?? `请求失败（${res.status}）`;
+    throw data?.code === "missing_keys" ? new MissingKeysError(message) : new Error(message);
   }
 
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();

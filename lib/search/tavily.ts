@@ -12,12 +12,13 @@ export const OFFICIAL_DOMAINS = [
   "chinacourt.org",
 ];
 
+export class SearchError extends Error {}
+
 const MAX_DOCS = 8;
 const MIN_CONTENT_LENGTH = 200;
 
-const client = tavily({ apiKey: process.env.TAVILY_API_KEY });
-
-export async function searchOfficialSources(queries: string[]): Promise<SourceDoc[]> {
+export async function searchOfficialSources(queries: string[], apiKey: string): Promise<SourceDoc[]> {
+  const client = tavily({ apiKey });
   const responses = await Promise.allSettled(
     queries.map((query) =>
       client.search(query, {
@@ -41,7 +42,10 @@ export async function searchOfficialSources(queries: string[]): Promise<SourceDo
   }
   if (byUrl.size === 0) {
     const firstError = responses.find((r) => r.status === "rejected");
-    if (firstError) throw new Error(`Tavily 搜索失败: ${String(firstError.reason)}`);
+    if (firstError) {
+      const reason = firstError.reason instanceof Error ? firstError.reason.message : String(firstError.reason);
+      throw new SearchError(reason);
+    }
   }
 
   const top = [...byUrl.values()].sort((a, b) => b.score - a.score).slice(0, MAX_DOCS);

@@ -11,8 +11,12 @@ History is stored only in the browser's `localStorage`.
 
 ## Setup
 
+You need a [DeepSeek](https://platform.deepseek.com/api_keys) and a [Tavily](https://app.tavily.com) API key. Either:
+
+- click **设置 API Key** in the app header (keys are stored in your browser's `localStorage` and sent to this app's server with each request), or
+- put them in `.env.local` (`cp .env.example .env.local`) as server-wide defaults. Keys set in the browser take precedence.
+
 ```bash
-cp .env.example .env.local   # fill in DEEPSEEK_API_KEY and TAVILY_API_KEY
 npm install
 npm run dev                  # http://localhost:3000
 npm test                     # unit tests for clause splitting and quote verification

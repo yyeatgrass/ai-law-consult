@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { RotateCcwClock, Scale, Send, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { consult } from "@/lib/consult-client";
+import { consult, MissingKeysError } from "@/lib/consult-client";
 import { loadHistory, saveHistory, type HistoryEntry } from "@/lib/history";
 import type { ConsultRequest, ConsultResult, Stage } from "@/lib/schemas";
+import { ApiKeySettings } from "./api-key-settings";
 import { ResultView } from "./result-view";
 import { StageProgress } from "./stage-progress";
 
@@ -36,6 +37,7 @@ export function ConsultApp() {
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<HistoryEntry | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export function ConsultApp() {
       }
     } catch (e) {
       if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e));
+      if (e instanceof MissingKeysError) setSettingsOpen(true);
     } finally {
       if (abortRef.current === controller) {
         setBusy(false);
@@ -87,9 +90,12 @@ export function ConsultApp() {
     <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_260px]">
       <main className="flex min-w-0 flex-col gap-5">
         <header className="flex flex-col gap-1">
-          <h1 className="flex items-center gap-2 text-2xl font-semibold">
-            <Scale className="size-6" /> 法律小帮手
-          </h1>
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="flex items-center gap-2 text-2xl font-semibold">
+              <Scale className="size-6" /> 法律小帮手
+            </h1>
+            <ApiKeySettings open={settingsOpen} onOpenChange={setSettingsOpen} />
+          </div>
           <p className="text-sm text-muted-foreground">
             说说你遇到了什么事。我会在全国人大、最高法、司法部等官方网站检索相关法律，告诉你法律怎么规定、你可以怎么做。
           </p>
