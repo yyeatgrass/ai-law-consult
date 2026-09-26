@@ -5,6 +5,7 @@ import { searchTavily } from "./engines/tavily";
 import type { SearchEngine, SearchHit } from "./engines/types";
 import { searchZhipu } from "./engines/zhipu";
 import { fetchPageText } from "./fetch-page";
+import { classifyLawDoc } from "./law-doc";
 import { isOfficialUrl, OFFICIAL_DOMAINS } from "./official-domains";
 import { SEARCH_PROVIDERS, type SearchProviderId } from "./providers";
 
@@ -24,8 +25,9 @@ const ENGINES: Record<SearchProviderId, SearchEngine> = {
 };
 
 const MAX_DOCS = 8;
+/** Extra candidates are fetched because news and commentary pages get filtered out. */
+const MAX_CANDIDATES = 16;
 const MIN_CONTENT_LENGTH = 200;
-const MIN_SNIPPET_LENGTH = 40;
 const CONCURRENCY = 3;
 
 export async function searchOfficialSources(
@@ -52,21 +54,20 @@ export async function searchOfficialSources(
     }
   }
 
-  const top = [...byUrl.values()].sort((a, b) => b.score - a.score).slice(0, MAX_DOCS);
+  const candidates = [...byUrl.values()].sort((a, b) => b.score - a.score).slice(0, MAX_CANDIDATES);
 
-  // Engines other than Tavily only return summaries, and clause verification needs the full text.
+  // Engines other than Tavily only return summaries, so the full page is downloaded
+  // to confirm it is the law text itself and to verify quotes against it.
   const docs = await Promise.all(
-    top.map(async (hit): Promise<SourceDoc | null> => {
+    candidates.map(async (hit): Promise<SourceDoc | null> => {
       let content = hit.content && hit.content.length >= MIN_CONTENT_LENGTH ? hit.content : null;
       content ??= await fetchPageText(hit.url);
-      if (content && content.length >= MIN_CONTENT_LENGTH) return { url: hit.url, title: hit.title, content };
-      if (hit.snippet.length >= MIN_SNIPPET_LENGTH) {
-        return { url: hit.url, title: hit.title, content: hit.snippet, fromSnippet: true };
-      }
-      return null;
+      if (!content || content.length < MIN_CONTENT_LENGTH) return null;
+      const doc = { url: hit.url, title: hit.title, content };
+      return classifyLawDoc(doc).ok ? doc : null;
     }),
   );
-  return docs.filter((d): d is SourceDoc => d !== null);
+  return docs.filter((d): d is SourceDoc => d !== null).slice(0, MAX_DOCS);
 }
 
 async function mapWithConcurrency<T, R>(

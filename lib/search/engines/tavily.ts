@@ -12,7 +12,6 @@ export const searchTavily: SearchEngine = async (query, apiKey, domains) => {
     url: r.url,
     title: r.title,
     content: r.rawContent,
-    snippet: r.content,
     score: r.score,
   }));
 };

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { ArrowLeft, Download, FileText } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { LIBRARY_DIR, listLaws } from "@/lib/law-library";
 import { lawDownloadHref, lawViewerHref } from "@/lib/law-links";
@@ -41,7 +40,6 @@ export default async function LawsPage() {
                   {new Date(law.savedAt).toLocaleString("zh-CN")}
                 </span>
               </div>
-              {law.fromSnippet && <Badge variant="outline">仅摘要</Badge>}
               <a href={lawDownloadHref(law.id)} className={buttonVariants({ variant: "ghost", size: "sm" })}>
                 <Download /> 下载
               </a>

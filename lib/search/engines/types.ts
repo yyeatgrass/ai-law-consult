@@ -1,10 +1,8 @@
 export type SearchHit = {
   url: string;
   title: string;
-  /** Full page text when the engine returns it (Tavily). */
+  /** Full page text when the engine returns it (Tavily); otherwise the page is downloaded. */
   content?: string;
-  /** Engine-provided summary; used when the full page can't be fetched. */
-  snippet: string;
   /** Higher is better; only compared between hits from the same engine. */
   score: number;
 };

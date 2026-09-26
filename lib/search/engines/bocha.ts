@@ -1,6 +1,6 @@
 import type { SearchEngine } from "./types";
 
-type BochaPage = { name?: string; url?: string; snippet?: string; summary?: string };
+type BochaPage = { name?: string; url?: string };
 type BochaResponse = {
   code?: number | string;
   msg?: string;
@@ -13,7 +13,7 @@ export const searchBocha: SearchEngine = async (query, apiKey, domains) => {
   const res = await fetch("https://api.bochaai.com/v1/web-search", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query, include: domains.join("|"), summary: true, count: 10 }),
+    body: JSON.stringify({ query, include: domains.join("|"), count: 10 }),
     signal: AbortSignal.timeout(20000),
   });
   const body = (await res.json().catch(() => ({}))) as BochaResponse;
@@ -27,7 +27,6 @@ export const searchBocha: SearchEngine = async (query, apiKey, domains) => {
     .map((p, rank) => ({
       url: p.url,
       title: p.name ?? "",
-      snippet: p.summary || p.snippet || "",
       score: 1 / (rank + 1),
     }));
 };

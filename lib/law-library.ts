@@ -10,8 +10,6 @@ export type SavedLaw = {
   title: string;
   lawName: string;
   content: string;
-  /** True when only the search engine's summary could be saved, not the full page. */
-  fromSnippet: boolean;
   savedAt: string;
 };
 
@@ -43,21 +41,14 @@ export async function saveLaws(docs: SourceDoc[]): Promise<Map<string, string>> 
     docs.map(async (doc) => {
       const id = lawIdForUrl(doc.url);
       const existing = await getLaw(id);
-      const fromSnippet = Boolean(doc.fromSnippet);
-      // Never replace a saved full text with a search summary, or a copy with a shorter one.
-      const keepExisting =
-        existing &&
-        (existing.fromSnippet === fromSnippet
-          ? existing.content.length >= doc.content.length
-          : !existing.fromSnippet);
-      if (!keepExisting) {
+      // Never replace a saved copy with a shorter one (e.g. a truncated fetch).
+      if (!existing || existing.content.length < doc.content.length) {
         const law: SavedLaw = {
           id,
           url: doc.url,
           title: doc.title,
           lawName: inferLawName(doc.title, doc.content),
           content: doc.content,
-          fromSnippet,
           savedAt: new Date().toISOString(),
         };
         try {

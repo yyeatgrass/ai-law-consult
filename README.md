@@ -3,7 +3,7 @@
 Describe a real-life dilemma (bullying, harassment, unpaid wages, defamation...) in plain Chinese. The app:
 
 1. Analyzes the facts and legal issues (DeepSeek).
-2. Searches official Chinese law sources only (`flk.npc.gov.cn`, `npc.gov.cn`, `gov.cn`, `court.gov.cn`, `spp.gov.cn`, `moj.gov.cn`, `chinacourt.org`) via Tavily, 博查 (Bocha) or 智谱 (Zhipu), downloads the full pages, and splits them into articles (第X条).
+2. Searches the issuing authorities' sites (`flk.npc.gov.cn`, `npc.gov.cn`, `gov.cn`, `court.gov.cn`, `spp.gov.cn`, `moj.gov.cn`) via Tavily, 博查 (Bocha) or 智谱 (Zhipu), downloads the full pages, and keeps **only primary legal texts** (laws, regulations, judicial interpretations with articles from 第一条 onward). News, commentary (解读), Q&A, cases, courses and drafts are discarded even on official sites (`lib/search/law-doc.ts`).
 3. Maps your facts to specific articles, and verifies every quote against the fetched source text. Clauses whose quote can't be found are marked "未能核实".
 4. Gives concrete next steps: evidence, who to contact, deadlines, possible claims.
 

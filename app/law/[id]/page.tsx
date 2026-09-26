@@ -48,7 +48,6 @@ export default async function LawPage({ params, searchParams }: PageProps<"/law/
         url: law.url,
         lawName: law.lawName,
         savedAt: law.savedAt,
-        fromSnippet: law.fromSnippet,
       }}
       sections={sections}
       targetIndex={targetIndex}

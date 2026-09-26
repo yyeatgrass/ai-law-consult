@@ -57,7 +57,7 @@ describe("isOfficialUrl", () => {
     ["http://www.npc.gov.cn/npc/c2/x.html", true],
     ["https://flk.npc.gov.cn/detail", true],
     ["https://www.court.gov.cn/a", true],
-    ["https://www.chinacourt.org/article", true],
+    ["https://www.chinacourt.org/article", false],
     ["https://fakegov.cn/a", false],
     ["https://gov.cn.evil.com/a", false],
     ["https://zhihu.com/q", false],

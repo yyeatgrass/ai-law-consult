@@ -55,7 +55,7 @@ export function ResultView({
         </h2>
         {clauses.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            未能在官方网站检索到可直接引用的条文。建议拨打 12348 法律援助热线获取专业意见。
+            未能在官方网站找到可引用的法律原文（解读、新闻等二手资料已被排除）。建议拨打 12348 法律援助热线获取专业意见。
           </p>
         ) : (
           clauses.map((c, i) => <ClauseCard key={`${c.sourceUrl}-${c.article}-${i}`} clause={c} />)
@@ -70,7 +70,7 @@ export function ResultView({
       {sources.length > 0 && (
         <Card size="sm">
           <CardHeader>
-            <CardTitle>检索到的官方来源</CardTitle>
+            <CardTitle>采用的法律原文</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-1 text-xs">

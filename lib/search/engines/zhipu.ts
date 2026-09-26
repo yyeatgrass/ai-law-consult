@@ -1,7 +1,7 @@
 import type { SearchEngine, SearchHit } from "./types";
 
 type ZhipuResponse = {
-  search_result?: { title?: string; content?: string; link?: string }[];
+  search_result?: { title?: string; link?: string }[];
   error?: { code?: string; message?: string };
 };
 
@@ -27,7 +27,6 @@ async function callZhipu(query: string, apiKey: string, domain?: string): Promis
       search_query: query.slice(0, MAX_QUERY_LENGTH),
       search_intent: false,
       count: 15,
-      content_size: "high",
       ...(domain && { search_domain_filter: domain }),
     }),
     signal: AbortSignal.timeout(20000),
@@ -40,7 +39,6 @@ async function callZhipu(query: string, apiKey: string, domain?: string): Promis
     .map((r, rank) => ({
       url: r.link!,
       title: r.title ?? "",
-      snippet: r.content ?? "",
       score: (domain ? 1 : 0.5) / (rank + 1),
     }));
 }

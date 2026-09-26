@@ -9,7 +9,6 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/laws/[id]/d
     law.lawName,
     `来源：${law.url}`,
     `保存时间：${new Date(law.savedAt).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" })}`,
-    law.fromSnippet ? "注意：未能读取完整网页，以下仅为搜索引擎提供的摘要。" : "",
     "仅供参考，请以官方发布的版本为准。",
   ].filter(Boolean);
   const body = `${header.join("\n")}\n\n${"=".repeat(40)}\n\n${law.content}\n`;

@@ -12,8 +12,6 @@ export type SourceDoc = {
   url: string;
   title: string;
   content: string;
-  /** Content is the search engine's summary because the full page couldn't be read. */
-  fromSnippet?: boolean;
 };
 
 const CN_NUM = "一二三四五六七八九十百千零〇两";

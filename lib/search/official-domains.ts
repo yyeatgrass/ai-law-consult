@@ -1,3 +1,4 @@
+/** Sites where the issuing authorities publish legal texts (NPC, State Council, SPC, SPP, MoJ). */
 export const OFFICIAL_DOMAINS = [
   "flk.npc.gov.cn",
   "npc.gov.cn",
@@ -5,7 +6,6 @@ export const OFFICIAL_DOMAINS = [
   "court.gov.cn",
   "spp.gov.cn",
   "moj.gov.cn",
-  "chinacourt.org",
 ];
 
 export function isOfficialUrl(url: string): boolean {

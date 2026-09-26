@@ -21,7 +21,7 @@ describe("searchBocha", () => {
         data: {
           webPages: {
             value: [
-              { name: "治安管理处罚法", url: "http://www.npc.gov.cn/a.html", summary: "第五十一条 殴打他人的……", snippet: "短" },
+              { name: "治安管理处罚法", url: "http://www.npc.gov.cn/a.html", summary: "第五十一条 殴打他人的……" },
               { name: "无链接" },
             ],
           },
@@ -32,10 +32,10 @@ describe("searchBocha", () => {
     const hits = await searchBocha("殴打 处罚", "sk-test", ["npc.gov.cn", "court.gov.cn"]);
 
     const [, init] = fetchMock.mock.calls[0];
-    expect(JSON.parse(String(init?.body))).toMatchObject({ query: "殴打 处罚", include: "npc.gov.cn|court.gov.cn", summary: true });
+    expect(JSON.parse(String(init?.body))).toMatchObject({ query: "殴打 处罚", include: "npc.gov.cn|court.gov.cn" });
     expect((init?.headers as Record<string, string>).Authorization).toBe("Bearer sk-test");
     expect(hits).toEqual([
-      { url: "http://www.npc.gov.cn/a.html", title: "治安管理处罚法", snippet: "第五十一条 殴打他人的……", score: 1 },
+      { url: "http://www.npc.gov.cn/a.html", title: "治安管理处罚法", score: 1 },
     ]);
   });
 

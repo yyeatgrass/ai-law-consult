@@ -16,7 +16,7 @@ export type LawSection = {
 export type LocateStatus = "none" | "found" | "article-only" | "quote-elsewhere" | "not-found";
 
 type Props = {
-  law: { id: string; url: string; lawName: string; savedAt: string; fromSnippet: boolean };
+  law: { id: string; url: string; lawName: string; savedAt: string };
   sections: LawSection[];
   targetIndex: number;
   status: LocateStatus;
@@ -91,11 +91,6 @@ export function LawViewer({ law, sections, targetIndex, status, requestedArticle
         foundArticle={target?.article ?? ""}
         hasQuote={hasQuote}
       />
-      {law.fromSnippet && (
-        <Banner tone="warn">
-          未能读取该网页的完整内容，这里只保存了搜索引擎提供的摘要。请点击「查看官方网页」阅读完整原文。
-        </Banner>
-      )}
 
       <article className="flex flex-col gap-1">
         {sections.map((s, i) => (
