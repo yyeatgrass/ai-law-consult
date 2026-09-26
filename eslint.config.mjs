@@ -13,10 +13,11 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "dist/**",
+    "desktop/server/**",
   ]),
   {
-    // Embedded in a Node single executable, which only supports CommonJS.
-    files: ["scripts/**/*.cjs"],
+    // Electron main process and electron-builder hooks are CommonJS.
+    files: ["desktop/*.cjs"],
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 ]);

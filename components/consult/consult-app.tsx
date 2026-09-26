@@ -162,7 +162,7 @@ export function ConsultApp() {
         <h2 className="flex items-center gap-1.5 text-sm font-medium">
           <RotateCcwClock className="size-4" /> 咨询记录
         </h2>
-        <p className="text-xs text-muted-foreground">仅保存在本浏览器中，不会上传。</p>
+        <p className="text-xs text-muted-foreground">仅保存在本机，不会上传。</p>
         {history.length === 0 && <p className="text-xs text-muted-foreground">暂无记录</p>}
         <ul className="flex flex-col gap-1">
           {history.map((h) => (

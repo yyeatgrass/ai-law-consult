@@ -1,0 +1,49 @@
+{
+  "name": "law-consult-desktop",
+  "productName": "法律小帮手",
+  "version": "0.2.0",
+  "description": "法律小帮手：按官方法律原文分析你的处境并给出建议",
+  "author": "yyeatgrass",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.yyeatgrass.lawconsult",
+    "productName": "法律小帮手",
+    "artifactName": "LawConsult-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "../dist/desktop",
+      "buildResources": "build"
+    },
+    "files": ["main.cjs", "package.json"],
+    "afterPack": "./after-pack.cjs",
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "category": "public.app-category.productivity",
+      "identity": "-",
+      "hardenedRuntime": false
+    },
+    "dmg": {
+      "title": "法律小帮手 ${version}"
+    },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "executableName": "LawConsult"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "法律小帮手",
+      "installerLanguages": ["zh_CN"],
+      "language": "2052"
+    }
+  }
+}

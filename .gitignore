@@ -46,3 +46,7 @@ next-env.d.ts
 
 # release archives
 /dist/
+
+# desktop build
+/desktop/node_modules/
+/desktop/server/

@@ -11,26 +11,29 @@ Describe a real-life dilemma (bullying, harassment, unpaid wages, defamation...)
 
 Every law found is saved to `data/laws/` on the machine running the app (override with `LAW_LIBRARY_DIR`). Each cited clause and each suggestion's legal basis has a **核对原文** (check the original) button. It opens the saved law at that article with the quoted sentence highlighted, so you can check it yourself. Saved laws are listed at `/laws` and can be downloaded as `.txt`.
 
-Consultation history is stored only in your browser's `localStorage`.
+Consultation history and API keys are stored only on your own computer.
 
-## Download and run (no installation)
+## Install the desktop app
 
-Download the zip for your computer from [Releases](https://github.com/yyeatgrass/law-consult/releases):
+Download the installer for your computer from [Releases](https://github.com/yyeatgrass/law-consult/releases):
 
 | File | For |
 |---|---|
-| `law-consult-<version>-darwin-arm64.zip` | Macs with Apple chips (M1–M4) |
-| `law-consult-<version>-darwin-x64.zip` | Intel Macs |
-| `law-consult-<version>-win-x64.zip` | Windows 10/11, 64-bit |
+| `LawConsult-<version>-mac-arm64.dmg` | Macs with Apple chips (M1–M4) |
+| `LawConsult-<version>-mac-x64.dmg` | Intel Macs |
+| `LawConsult-<version>-win-x64.exe` | Windows 10/11, 64-bit |
 
-Unzip it and double-click `LawConsult` (macOS) or `LawConsult.exe` (Windows). A console window opens and your browser opens at `http://localhost:3000`; if that port is busy, the app picks the next free one and shows the address in the window. Close the window to quit.
+- **macOS**: open the `.dmg` and drag **法律小帮手** into **Applications**.
+- **Windows**: run the installer. It adds a desktop shortcut and a Start menu entry.
 
-The binaries aren't signed with a paid developer certificate, so the system warns on first launch:
+Then open 法律小帮手 like any other app. On first use, click **设置 API Key** at the top of the window (see [API keys](#api-keys) below).
 
-- **macOS**: right-click `LawConsult` → **Open** → **Open**, or allow it under **System Settings → Privacy & Security**. You can also run `xattr -dr com.apple.quarantine <folder>` in Terminal.
+The app isn't signed with a paid developer certificate, so the system warns on first launch:
+
+- **macOS**: right-click the app in Applications → **Open** → **Open**, or allow it under **System Settings → Privacy & Security**. If macOS says the app "is damaged", run `xattr -dr com.apple.quarantine /Applications/法律小帮手.app` in Terminal.
 - **Windows**: in the "Windows protected your PC" dialog, click **More info** → **Run anyway**.
 
-Downloaded laws are kept in `data/laws/` next to the program. Keep that folder when you upgrade. An optional `.env` file next to the program (copy it from `.env.example`) provides keys for everyone using this copy.
+Downloaded laws are kept in the app's data folder, which survives upgrades: `~/Library/Application Support/法律小帮手/laws` on macOS and `%APPDATA%\法律小帮手\laws` on Windows. The **法律库** menu opens the saved laws or that folder.
 
 ## API keys
 
@@ -44,8 +47,8 @@ You need a [DeepSeek](https://platform.deepseek.com/api_keys) API key plus a key
 
 Set them either way:
 
-- Click **设置 API Key** in the app header. Keys are stored in your browser's `localStorage` and sent to this app's server with each request.
-- Or put them in `.env.local` (`cp .env.example .env.local`) as server-wide defaults. Keys set in the browser take precedence.
+- Click **设置 API Key** in the app header. Keys are stored in `localStorage` and sent to the app's server with each request.
+- When running from source, you can instead put them in `.env.local` (`cp .env.example .env.local`) as server-wide defaults. Keys set in the app take precedence.
 
 ## Development
 
@@ -53,22 +56,31 @@ Requires Node.js 20.9 or later.
 
 ```bash
 npm install
-npm run dev                  # http://localhost:3000
+npm run dev                  # web version at http://localhost:3000
 npm test                     # unit tests
 npm run lint
 ```
 
-## Building a release
-
-Build on macOS, because the Mac binaries are ad-hoc signed with `codesign`. The Windows build is produced there too.
+To try the desktop shell without building installers:
 
 ```bash
-npm run release                       # all targets: darwin-arm64, darwin-x64, win-x64
-npm run release -- --targets=win-x64  # a subset
-NODE_MIRROR=https://npmmirror.com/mirrors/node npm run release  # faster Node.js download in China
+node scripts/release.mjs --stage-only   # build the Next.js server into desktop/server
+cd desktop && npm install && npm start
 ```
 
-The script builds the Next.js standalone server, embeds `scripts/launcher.cjs` into the official Node.js binary for each platform as a [single executable application](https://nodejs.org/api/single-executable-applications.html), and writes `dist/law-consult-<version>-<target>.zip`. To publish a new version, bump `version` in `package.json`, run the script, and upload the zips to a new GitHub release.
+## Building the installers
+
+Build on macOS: the Mac apps are ad-hoc signed with `codesign`, and electron-builder can produce the Windows installer there too (no Wine needed).
+
+```bash
+npm run release              # macOS arm64 + x64 .dmg and Windows x64 installer
+npm run release -- --mac     # macOS only
+npm run release -- --win     # Windows only
+```
+
+The script builds the Next.js standalone server, stages it into `desktop/server`, and runs electron-builder in `desktop/`. The installers are written to `dist/desktop/`. Electron and electron-builder binaries are downloaded from the npmmirror CDN by default, because GitHub downloads are unreliable in China; pass `--no-mirror` to use the official sources. `desktop/main.cjs` runs the server in an Electron utility process on `127.0.0.1:38517`. The port is fixed because saved keys and history are tied to it, and the app falls back to a random free port only when 38517 is taken.
+
+To publish a new version, bump `version` in `package.json` (the script copies it into `desktop/package.json`), run the script, and upload the `.dmg` and `.exe` files to a new GitHub release.
 
 ## Project layout
 
@@ -78,7 +90,8 @@ The script builds the Next.js standalone server, embeds `scripts/launcher.cjs` i
 - `app/api/consult/route.ts`: streams stage progress and the final result (AI SDK UI message stream)
 - `app/law/[id]/`, `app/laws/`: law viewer and library pages
 - `components/consult/`, `components/law/`: UI
-- `scripts/`: desktop release build (`release.mjs`) and the executable's launcher (`launcher.cjs`)
+- `desktop/`: Electron shell (`main.cjs`), packaging hook (`after-pack.cjs`), app icon (`build/`), and electron-builder config (`package.json`)
+- `scripts/release.mjs`: builds the installers
 
 ## Disclaimer
 

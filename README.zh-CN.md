@@ -11,26 +11,29 @@
 
 检索到的法律都会保存在运行本程序的电脑上的 `data/laws/` 文件夹里（可用 `LAW_LIBRARY_DIR` 修改位置）。每条引用的条文和每条建议的法律依据旁都有 **核对原文** 按钮，点开会跳到保存的法律原文中对应的条，并高亮引用的句子，方便你自己确认。已保存的法律可以在 `/laws` 页面查看，也可以下载为 `.txt`。
 
-咨询记录只保存在你浏览器的 `localStorage` 里。
+咨询记录和 API Key 只保存在你自己的电脑上。
 
-## 下载即用（无需安装）
+## 安装桌面版
 
-在 [Releases](https://github.com/yyeatgrass/law-consult/releases) 页面下载对应电脑的压缩包：
+在 [Releases](https://github.com/yyeatgrass/law-consult/releases) 页面下载对应电脑的安装包：
 
 | 文件 | 适用于 |
 |---|---|
-| `law-consult-<版本>-darwin-arm64.zip` | Apple 芯片（M1–M4）的 Mac |
-| `law-consult-<版本>-darwin-x64.zip` | Intel 芯片的 Mac |
-| `law-consult-<版本>-win-x64.zip` | Windows 10/11（64 位） |
+| `LawConsult-<版本>-mac-arm64.dmg` | Apple 芯片（M1–M4）的 Mac |
+| `LawConsult-<版本>-mac-x64.dmg` | Intel 芯片的 Mac |
+| `LawConsult-<版本>-win-x64.exe` | Windows 10/11（64 位） |
 
-解压后双击 `LawConsult`（macOS）或 `LawConsult.exe`（Windows）。会出现一个命令行窗口，浏览器自动打开 `http://localhost:3000`。如果 3000 端口被占用，程序会自动换用下一个空闲端口，并在窗口里显示地址。用完关闭窗口即可退出。
+- **macOS**：打开 `.dmg`，把 **法律小帮手** 拖进 **应用程序** 文件夹。
+- **Windows**：运行安装程序，安装后桌面和开始菜单都会有快捷方式。
+
+之后像普通软件一样打开"法律小帮手"即可。第一次使用时，点窗口顶部的 **设置 API Key**（见下方 [API 密钥](#api-密钥)）。
 
 程序没有使用付费的开发者证书签名，首次运行时系统会提示：
 
-- **macOS**：在 `LawConsult` 上点右键 → **打开** → 再点 **打开**；或在 **系统设置 → 隐私与安全性** 中允许打开。也可以在终端执行 `xattr -dr com.apple.quarantine <文件夹路径>`。
+- **macOS**：在"应用程序"里的"法律小帮手"上点右键 → **打开** → 再点 **打开**；或在 **系统设置 → 隐私与安全性** 中允许打开。如果提示"已损坏"，在终端执行 `xattr -dr com.apple.quarantine /Applications/法律小帮手.app`。
 - **Windows**：在"Windows 已保护你的电脑"提示中点 **更多信息** → **仍要运行**。
 
-下载的法律保存在程序旁边的 `data/laws/` 文件夹里，升级时保留这个文件夹即可。也可以在程序旁放一个 `.env` 文件（从 `.env.example` 复制）写入密钥，这样使用这份程序的所有浏览器都不用再填。
+下载的法律保存在程序的数据文件夹里，升级后不会丢失：macOS 为 `~/Library/Application Support/法律小帮手/laws`，Windows 为 `%APPDATA%\法律小帮手\laws`。通过菜单栏的 **法律库** 可以查看已下载的法律或打开这个文件夹。
 
 ## API 密钥
 
@@ -44,8 +47,8 @@
 
 两种设置方式任选其一：
 
-- 点页面顶部的 **设置 API Key**。密钥保存在你浏览器的 `localStorage` 中，每次咨询时发送给本程序的服务端。
-- 或者写入 `.env.local`（`cp .env.example .env.local`），作为服务端的默认密钥。浏览器里设置的密钥优先。
+- 点窗口顶部的 **设置 API Key**。密钥保存在 `localStorage` 中，每次咨询时发送给程序内置的服务端。
+- 从源码运行时，也可以写入 `.env.local`（`cp .env.example .env.local`），作为服务端的默认密钥。在程序里设置的密钥优先。
 
 ## 开发
 
@@ -53,22 +56,31 @@
 
 ```bash
 npm install
-npm run dev                  # http://localhost:3000
+npm run dev                  # 网页版：http://localhost:3000
 npm test                     # 单元测试
 npm run lint
 ```
 
-## 打包发布
-
-请在 macOS 上打包，因为 Mac 版程序需要用 `codesign` 做本地签名。Windows 版也在 Mac 上一起生成。
+不打安装包、直接试运行桌面版：
 
 ```bash
-npm run release                       # 全部平台：darwin-arm64、darwin-x64、win-x64
-npm run release -- --targets=win-x64  # 只打包部分平台
-NODE_MIRROR=https://npmmirror.com/mirrors/node npm run release  # 国内下载 Node.js 更快
+node scripts/release.mjs --stage-only   # 把 Next.js 服务构建到 desktop/server
+cd desktop && npm install && npm start
 ```
 
-打包脚本会先构建 Next.js standalone 服务，再把 `scripts/launcher.cjs` 以[单文件可执行程序](https://nodejs.org/api/single-executable-applications.html)的方式嵌入各平台的官方 Node.js 程序，最后生成 `dist/law-consult-<版本>-<平台>.zip`。发布新版本时，先修改 `package.json` 中的 `version`，运行打包脚本，再把压缩包上传到新的 GitHub Release。
+## 打包安装程序
+
+请在 macOS 上打包：Mac 版需要用 `codesign` 做本地签名，electron-builder 也能在 Mac 上直接生成 Windows 安装程序（不需要 Wine）。
+
+```bash
+npm run release              # macOS arm64 + x64 的 .dmg，以及 Windows x64 安装程序
+npm run release -- --mac     # 只打包 macOS
+npm run release -- --win     # 只打包 Windows
+```
+
+打包脚本会先构建 Next.js standalone 服务，放到 `desktop/server`，再在 `desktop/` 里运行 electron-builder，安装包输出到 `dist/desktop/`。由于在国内从 GitHub 下载不稳定，Electron 和 electron-builder 的二进制文件默认从 npmmirror CDN 下载；加 `--no-mirror` 可改用官方地址。`desktop/main.cjs` 会在 Electron 的 utility process 中运行服务，监听 `127.0.0.1:38517`。端口固定是因为保存的密钥和咨询记录与端口绑定，只有 38517 被占用时才会临时换用其他空闲端口。
+
+发布新版本时，先修改 `package.json` 中的 `version`（脚本会自动同步到 `desktop/package.json`），运行打包脚本，再把 `.dmg` 和 `.exe` 上传到新的 GitHub Release。
 
 ## 项目结构
 
@@ -78,7 +90,8 @@ NODE_MIRROR=https://npmmirror.com/mirrors/node npm run release  # 国内下载 N
 - `app/api/consult/route.ts`：以流的形式返回各阶段进度和最终结果（AI SDK UI message stream）
 - `app/law/[id]/`、`app/laws/`：法律原文查看页和法律库页面
 - `components/consult/`、`components/law/`：界面组件
-- `scripts/`：桌面版打包脚本（`release.mjs`）和可执行程序的启动器（`launcher.cjs`）
+- `desktop/`：Electron 外壳（`main.cjs`）、打包钩子（`after-pack.cjs`）、应用图标（`build/`）和 electron-builder 配置（`package.json`）
+- `scripts/release.mjs`：打包安装程序
 
 ## 免责声明
 

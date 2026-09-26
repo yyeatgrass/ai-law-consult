@@ -91,7 +91,7 @@ export function ApiKeySettings({
           <DialogHeader>
             <DialogTitle>设置 API Key</DialogTitle>
             <DialogDescription>
-              Key 只保存在你当前的浏览器中，仅在分析时随请求发送给本应用的服务器，不会上传到其他地方。
+              Key 只保存在本机，仅在分析时发送给 DeepSeek 和你选择的搜索服务，不会上传到其他地方。
             </DialogDescription>
           </DialogHeader>
 
