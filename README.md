@@ -1,4 +1,4 @@
-# 法律小帮手 (Law Consult)
+# AI法律小帮手 (Law Consult)
 
 **English** | [简体中文](README.zh-CN.md)
 
@@ -23,17 +23,17 @@ Download the installer for your computer from [Releases](https://github.com/yyea
 | `LawConsult-<version>-mac-x64.dmg` | Intel Macs |
 | `LawConsult-<version>-win-x64.exe` | Windows 10/11, 64-bit |
 
-- **macOS**: open the `.dmg` and drag **法律小帮手** into **Applications**.
+- **macOS**: open the `.dmg` and drag **AI法律小帮手** into **Applications**.
 - **Windows**: run the installer. It adds a desktop shortcut and a Start menu entry.
 
-Then open 法律小帮手 like any other app. On first use, click **设置 API Key** at the top of the window (see [API keys](#api-keys) below).
+Then open AI法律小帮手 like any other app. On first use, click **设置 API Key** at the top of the window (see [API keys](#api-keys) below).
 
 The app isn't signed with a paid developer certificate, so the system warns on first launch:
 
-- **macOS**: macOS says "法律小帮手" Not Opened. Click **Done**, open **System Settings → Privacy & Security**, scroll to the bottom and click **Open Anyway** next to 法律小帮手, then confirm. You only need to do this once. On macOS 14 and earlier you can instead right-click the app → **Open**. Alternatively, run `xattr -dr com.apple.quarantine /Applications/法律小帮手.app` in Terminal, which also fixes an "is damaged" message.
+- **macOS**: macOS says "AI法律小帮手" Not Opened. Click **Done**, open **System Settings → Privacy & Security**, scroll to the bottom and click **Open Anyway** next to AI法律小帮手, then confirm. You only need to do this once. On macOS 14 and earlier you can instead right-click the app → **Open**. Alternatively, run `xattr -dr com.apple.quarantine /Applications/AI法律小帮手.app` in Terminal, which also fixes an "is damaged" message.
 - **Windows**: in the "Windows protected your PC" dialog, click **More info** → **Run anyway**.
 
-Downloaded laws are kept in the app's data folder, which survives upgrades: `~/Library/Application Support/法律小帮手/laws` on macOS and `%APPDATA%\法律小帮手\laws` on Windows. The **法律库** menu opens the saved laws or that folder.
+Downloaded laws are kept in the app's data folder, which survives upgrades: `~/Library/Application Support/AI法律小帮手/laws` on macOS and `%APPDATA%\AI法律小帮手\laws` on Windows. The **法律库** menu opens the saved laws or that folder. Data saved under the previous name 法律小帮手 is moved there automatically the first time you open this version.
 
 ## API keys
 

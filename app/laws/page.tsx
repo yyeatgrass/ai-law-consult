@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { LIBRARY_DIR, listLaws } from "@/lib/law-library";
 import { lawDownloadHref, lawViewerHref } from "@/lib/law-links";
 
-export const metadata: Metadata = { title: "已下载的法律 · 法律小帮手" };
+export const metadata: Metadata = { title: "已下载的法律 · AI法律小帮手" };
 
 export default async function LawsPage() {
   await connection();

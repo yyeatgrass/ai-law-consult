@@ -6,7 +6,8 @@ const http = require("node:http");
 const net = require("node:net");
 const path = require("node:path");
 
-const APP_NAME = "法律小帮手";
+const APP_NAME = "AI法律小帮手";
+const PREVIOUS_APP_NAME = "法律小帮手";
 const HOST = "127.0.0.1";
 // localStorage (API keys, history) is scoped to the origin, so keep the port
 // stable across launches and only fall back when it is taken.
@@ -20,7 +21,17 @@ let quitting = false;
 const serverDir = app.isPackaged
   ? path.join(process.resourcesPath, "server")
   : path.join(__dirname, "server");
-const libraryDir = path.join(app.getPath("userData"), "laws");
+
+// Keys, history and downloaded laws live in a folder named after the app.
+// Rename the previous folder so existing installs keep their data.
+app.setName(APP_NAME);
+const userData = path.join(app.getPath("appData"), APP_NAME);
+const previousUserData = path.join(app.getPath("appData"), PREVIOUS_APP_NAME);
+if (!fs.existsSync(userData) && fs.existsSync(previousUserData)) {
+  fs.renameSync(previousUserData, userData);
+}
+app.setPath("userData", userData);
+const libraryDir = path.join(userData, "laws");
 
 function portIsFree(port) {
   return new Promise((resolve) => {
@@ -154,8 +165,6 @@ function buildMenu() {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.setName(APP_NAME);
-
   app.on("second-instance", () => {
     if (!mainWindow) return;
     if (mainWindow.isMinimized()) mainWindow.restore();

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "法律小帮手",
+  title: "AI法律小帮手",
   description: "描述你的遭遇，检索官方法律条文，获得通俗的法律参考与行动建议。",
 };
 

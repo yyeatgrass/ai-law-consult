@@ -93,7 +93,7 @@ export function ConsultApp() {
         <header className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2">
             <h1 className="flex items-center gap-2 text-2xl font-semibold">
-              <Scale className="size-6" /> 法律小帮手
+              <Scale className="size-6" /> AI法律小帮手
             </h1>
             <ApiKeySettings open={settingsOpen} onOpenChange={setSettingsOpen} />
           </div>

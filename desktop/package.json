@@ -1,8 +1,8 @@
 {
   "name": "law-consult-desktop",
-  "productName": "法律小帮手",
+  "productName": "AI法律小帮手",
   "version": "0.2.0",
-  "description": "法律小帮手：按官方法律原文分析你的处境并给出建议",
+  "description": "AI法律小帮手：按官方法律原文分析你的处境并给出建议",
   "author": "yyeatgrass",
   "private": true,
   "main": "main.cjs",
@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.yyeatgrass.lawconsult",
-    "productName": "法律小帮手",
+    "productName": "AI法律小帮手",
     "artifactName": "LawConsult-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "../dist/desktop",
@@ -30,7 +30,7 @@
       "hardenedRuntime": false
     },
     "dmg": {
-      "title": "法律小帮手 ${version}"
+      "title": "AI法律小帮手 ${version}"
     },
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
@@ -41,7 +41,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "法律小帮手",
+      "shortcutName": "AI法律小帮手",
       "installerLanguages": ["zh_CN"],
       "language": "2052"
     }
