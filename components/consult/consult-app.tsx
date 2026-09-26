@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcwClock, Scale, Send, Trash } from "lucide-react";
+import Link from "next/link";
+import { Library, RotateCcwClock, Scale, Send, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { consult, MissingKeysError } from "@/lib/consult-client";
@@ -152,6 +153,12 @@ export function ConsultApp() {
       </main>
 
       <aside className="flex flex-col gap-2">
+        <Link
+          href="/laws"
+          className="mb-3 flex items-center gap-1.5 rounded-md p-2 text-sm font-medium ring-1 ring-foreground/10 hover:bg-muted"
+        >
+          <Library className="size-4" /> 已下载的法律
+        </Link>
         <h2 className="flex items-center gap-1.5 text-sm font-medium">
           <RotateCcwClock className="size-4" /> 咨询记录
         </h2>

@@ -7,6 +7,8 @@ Describe a real-life dilemma (bullying, harassment, unpaid wages, defamation...)
 3. Maps your facts to specific articles, and verifies every quote against the fetched source text. Clauses whose quote can't be found are marked "未能核实".
 4. Gives concrete next steps: evidence, who to contact, deadlines, possible claims.
 
+Every official page found is saved to `data/laws/` on the machine running the app (override with `LAW_LIBRARY_DIR`). Each cited clause and each suggestion's legal basis has a **核对原文** button that opens the saved law at that article with the quoted sentence highlighted, so you can check it yourself. Saved laws are listed at `/laws` and can be downloaded as `.txt`.
+
 History is stored only in the browser's `localStorage`.
 
 ## Setup

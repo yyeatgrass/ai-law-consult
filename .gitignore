@@ -20,6 +20,9 @@
 # production
 /build
 
+# locally downloaded law texts
+/data/
+
 # misc
 .DS_Store
 *.pem

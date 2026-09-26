@@ -40,7 +40,8 @@ export const mappingSchema = z.object({
   gaps: z.array(z.string()).describe("检索到的资料未能覆盖、但可能相关的法律问题"),
 });
 
-export type VerifiedClause = MappedClause & { verified: boolean };
+/** `lawId` points at the locally saved copy of the source page, when it could be saved. */
+export type VerifiedClause = MappedClause & { verified: boolean; lawId?: string };
 
 export const suggestionSchema = z.object({
   assessment: z.string().describe("对用户处境的整体法律评估，通俗易懂，3-5句"),
@@ -63,7 +64,7 @@ export const suggestionSchema = z.object({
 });
 export type Suggestion = z.infer<typeof suggestionSchema>;
 
-export type ConsultSource = { url: string; title: string };
+export type ConsultSource = { url: string; title: string; lawId?: string };
 
 export type ConsultResult = {
   analysis: Analysis;

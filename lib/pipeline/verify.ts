@@ -1,14 +1,8 @@
+import { normalizeText } from "@/lib/quote";
 import type { Clause, SourceDoc } from "@/lib/search/clauses";
 import type { MappedClause, VerifiedClause } from "@/lib/schemas";
 
 const MIN_QUOTE_LENGTH = 8;
-
-export function normalizeText(text: string): string {
-  return text
-    .normalize("NFKC")
-    .replace(/[\s\u3000]+/g, "")
-    .replace(/[\p{P}\p{S}]/gu, "");
-}
 
 /**
  * Re-anchors each mapped clause to the retrieved source text. Metadata (law name,

@@ -59,10 +59,11 @@ export async function searchOfficialSources(
     top.map(async (hit): Promise<SourceDoc | null> => {
       let content = hit.content && hit.content.length >= MIN_CONTENT_LENGTH ? hit.content : null;
       content ??= await fetchPageText(hit.url);
-      if (!content || content.length < MIN_CONTENT_LENGTH) {
-        content = hit.snippet.length >= MIN_SNIPPET_LENGTH ? hit.snippet : null;
+      if (content && content.length >= MIN_CONTENT_LENGTH) return { url: hit.url, title: hit.title, content };
+      if (hit.snippet.length >= MIN_SNIPPET_LENGTH) {
+        return { url: hit.url, title: hit.title, content: hit.snippet, fromSnippet: true };
       }
-      return content ? { url: hit.url, title: hit.title, content } : null;
+      return null;
     }),
   );
   return docs.filter((d): d is SourceDoc => d !== null);

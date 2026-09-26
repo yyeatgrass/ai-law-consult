@@ -1,4 +1,5 @@
 import type { ResolvedKeys } from "@/lib/api-keys";
+import { saveLaws } from "@/lib/law-library";
 import { formatSituation } from "@/lib/prompts";
 import type { ConsultRequest, ConsultResult, StageEvent } from "@/lib/schemas";
 import { rankClauses, splitClauses } from "@/lib/search/clauses";
@@ -30,6 +31,7 @@ export async function runConsultation(
     provider: keys.searchProvider,
     apiKey: keys.searchKey,
   });
+  const savingLaws = saveLaws(docs);
   const allClauses = docs.flatMap(splitClauses);
   const ranked = rankClauses(allClauses, {
     keywords: [...analysis.keywords, ...analysis.legalIssues],
@@ -46,14 +48,15 @@ export async function runConsultation(
   onStage({ stage: "suggesting", message: "正在根据条文生成行动建议…" });
   const suggestion = await makeSuggestions(analysis, clauses, llm);
 
+  const lawIds = await savingLaws;
   const citedUrls = new Set(clauses.map((c) => c.sourceUrl));
   return {
     analysis,
-    clauses,
+    clauses: clauses.map((c) => ({ ...c, lawId: lawIds.get(c.sourceUrl) })),
     gaps: mapping.gaps,
     suggestion,
     sources: docs
-      .map((d) => ({ url: d.url, title: d.title }))
+      .map((d) => ({ url: d.url, title: d.title, lawId: lawIds.get(d.url) }))
       .sort((a, b) => Number(citedUrls.has(b.url)) - Number(citedUrls.has(a.url))),
   };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { MappedClause } from "@/lib/schemas";
 import { splitClauses } from "@/lib/search/clauses";
-import { normalizeText, verifyClauses } from "./verify";
+import { verifyClauses } from "./verify";
 
 const doc = {
   url: "https://flk.npc.gov.cn/detail?id=1",
@@ -23,12 +23,6 @@ function mapped(overrides: Partial<MappedClause>): MappedClause {
     ...overrides,
   };
 }
-
-describe("normalizeText", () => {
-  it("ignores whitespace, punctuation and full-width differences", () => {
-    expect(normalizeText("殴打他人的， 或者\n故意伤害")).toBe(normalizeText("殴打他人的,或者故意伤害"));
-  });
-});
 
 describe("verifyClauses", () => {
   it("verifies exact quotes", () => {

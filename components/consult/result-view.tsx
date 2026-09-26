@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, ExternalLink, Gavel, Phone, ShieldCheck, TriangleAlert } from "lucide-react";
+import { BookOpenCheck, Clock, Download, ExternalLink, Gavel, Phone, ShieldCheck, TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { findClauseForRef, lawDownloadHref, lawViewerHref } from "@/lib/law-links";
 import type { ConsultResult, Suggestion, VerifiedClause } from "@/lib/schemas";
 
 const RELEVANCE_LABEL = { high: "高度相关", medium: "相关", low: "可能相关" } as const;
@@ -64,7 +65,7 @@ export function ResultView({
         )}
       </section>
 
-      <SuggestionView suggestion={suggestion} />
+      <SuggestionView suggestion={suggestion} clauses={clauses} />
 
       {sources.length > 0 && (
         <Card size="sm">
@@ -74,10 +75,28 @@ export function ResultView({
           <CardContent>
             <ul className="flex flex-col gap-1 text-xs">
               {sources.map((s) => (
-                <li key={s.url}>
+                <li key={s.url} className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <a href={s.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
                     {s.title || s.url}
                   </a>
+                  {s.lawId && (
+                    <>
+                      <a
+                        href={lawViewerHref(s.lawId)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-muted-foreground hover:text-foreground hover:underline"
+                      >
+                        本地副本
+                      </a>
+                      <a
+                        href={lawDownloadHref(s.lawId)}
+                        className="inline-flex items-center gap-0.5 text-muted-foreground hover:text-foreground hover:underline"
+                      >
+                        <Download className="size-3" /> 下载
+                      </a>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -114,20 +133,54 @@ function ClauseCard({ clause }: { clause: VerifiedClause }) {
           <span className="font-medium">对你意味着：</span>
           {clause.howItApplies}
         </p>
-        <a
-          href={clause.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-        >
-          查看官方原文 <ExternalLink className="size-3" />
-        </a>
+        <div className="flex flex-wrap items-center gap-3">
+          <VerifyButton clause={clause} />
+          <a
+            href={clause.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            查看官方网页 <ExternalLink className="size-3" />
+          </a>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-function SuggestionView({ suggestion }: { suggestion: Suggestion }) {
+function VerifyButton({ clause, size = "sm" }: { clause: VerifiedClause; size?: "sm" | "xs" }) {
+  if (!clause.lawId) return null;
+  return (
+    <a
+      href={lawViewerHref(clause.lawId, { article: clause.article, quote: clause.quote })}
+      target="_blank"
+      rel="noreferrer"
+      className={buttonVariants({ variant: "outline", size })}
+      title="打开本地保存的法律原文，定位到该条并高亮引用的原句"
+    >
+      <BookOpenCheck /> 核对原文
+    </a>
+  );
+}
+
+function RelatedArticle({ refText, clauses }: { refText: string; clauses: VerifiedClause[] }) {
+  const clause = findClauseForRef(refText, clauses);
+  if (!clause?.lawId) return <span className="rounded bg-muted px-1.5 py-0.5">{refText}</span>;
+  return (
+    <a
+      href={lawViewerHref(clause.lawId, { article: clause.article, quote: clause.quote })}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-primary hover:bg-primary/10"
+      title="打开本地保存的法律原文核对"
+    >
+      {refText} <BookOpenCheck className="size-3" />
+    </a>
+  );
+}
+
+function SuggestionView({ suggestion, clauses }: { suggestion: Suggestion; clauses: VerifiedClause[] }) {
   const [done, setDone] = useState<Set<number>>(new Set());
   const toggle = (i: number) =>
     setDone((prev) => {
@@ -161,7 +214,12 @@ function SuggestionView({ suggestion }: { suggestion: Suggestion }) {
                 </div>
                 <p className="mt-1 text-sm">{step.detail}</p>
                 {step.relatedArticles.length > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">依据：{step.relatedArticles.join("、")}</p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                    依据：
+                    {step.relatedArticles.map((ref) => (
+                      <RelatedArticle key={ref} refText={ref} clauses={clauses} />
+                    ))}
+                  </div>
                 )}
               </div>
             </li>
