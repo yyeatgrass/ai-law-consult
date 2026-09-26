@@ -98,7 +98,7 @@ export function ConsultApp() {
             <ApiKeySettings open={settingsOpen} onOpenChange={setSettingsOpen} />
           </div>
           <p className="text-sm text-muted-foreground">
-            说说你遇到了什么事。我会在全国人大、国务院、最高法、司法部等官方网站检索法律原文，告诉你法律怎么规定、建议你可以怎么做。
+            说说你遭遇到了什么事。我会在全国人大、国务院、最高法、司法部等官方网站检索法律原文，告诉你法律怎么规定、建议你可以怎么做。
           </p>
         </header>
 
