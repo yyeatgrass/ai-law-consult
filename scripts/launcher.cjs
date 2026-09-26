@@ -21,7 +21,7 @@ const appDir = path.join(baseDir, "app");
 const serverFile = path.join(appDir, "server.js");
 
 function fail(message) {
-  console.error(`\n[法律咨询助手] ${message}\n`);
+  console.error(`\n[法律小帮手] ${message}\n`);
   if (process.platform === "win32") {
     console.error("按回车键退出…");
     process.stdin.resume();
@@ -112,7 +112,7 @@ async function main() {
   process.env.LAW_LIBRARY_DIR ||= path.join(baseDir, "data", "laws");
 
   const url = `http://localhost:${port}`;
-  console.log("法律咨询助手正在启动…");
+  console.log("法律小帮手正在启动…");
   createRequire(serverFile)(serverFile);
 
   if (await waitForServer(`http://${host}:${port}/`, 30000)) {
