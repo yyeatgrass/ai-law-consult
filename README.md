@@ -30,7 +30,7 @@ Then open 法律小帮手 like any other app. On first use, click **设置 API K
 
 The app isn't signed with a paid developer certificate, so the system warns on first launch:
 
-- **macOS**: right-click the app in Applications → **Open** → **Open**, or allow it under **System Settings → Privacy & Security**. If macOS says the app "is damaged", run `xattr -dr com.apple.quarantine /Applications/法律小帮手.app` in Terminal.
+- **macOS**: macOS says "法律小帮手" Not Opened. Click **Done**, open **System Settings → Privacy & Security**, scroll to the bottom and click **Open Anyway** next to 法律小帮手, then confirm. You only need to do this once. On macOS 14 and earlier you can instead right-click the app → **Open**. Alternatively, run `xattr -dr com.apple.quarantine /Applications/法律小帮手.app` in Terminal, which also fixes an "is damaged" message.
 - **Windows**: in the "Windows protected your PC" dialog, click **More info** → **Run anyway**.
 
 Downloaded laws are kept in the app's data folder, which survives upgrades: `~/Library/Application Support/法律小帮手/laws` on macOS and `%APPDATA%\法律小帮手\laws` on Windows. The **法律库** menu opens the saved laws or that folder.
