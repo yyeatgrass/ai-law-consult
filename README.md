@@ -32,6 +32,20 @@ npm run dev                  # http://localhost:3000
 npm test                     # unit tests for clause splitting and quote verification
 ```
 
+## Desktop release (macOS / Windows)
+
+End users don't need Node.js. Download the zip for your platform from [Releases](https://github.com/yyeatgrass/law-consult/releases), unzip it, and double-click `LawConsult` (macOS) or `LawConsult.exe` (Windows). A console window opens, the browser opens at `http://localhost:3000` (or the next free port), and closing the window stops the app. Downloaded laws are kept in `data/laws/` next to the executable; an optional `.env` there provides server-side keys.
+
+To build the archives (on macOS, since the Mac binaries are ad-hoc signed with `codesign`):
+
+```bash
+npm run release                       # all targets: darwin-arm64, darwin-x64, win-x64
+npm run release -- --targets=win-x64  # a subset
+NODE_MIRROR=https://npmmirror.com/mirrors/node npm run release  # faster download in China
+```
+
+The script builds the Next.js standalone server, embeds `scripts/launcher.cjs` into the official Node.js binary for each platform as a [single executable application](https://nodejs.org/api/single-executable-applications.html), and writes `dist/law-consult-<version>-<target>.zip`. The binaries are not notarized or code-signed with a developer certificate, so macOS Gatekeeper and Windows SmartScreen warn on first launch; the bundled `使用说明.txt` explains how to proceed.
+
 ## Layout
 
 - `lib/pipeline/` — `analyze` → search → `map` → `verify` → `suggest`, orchestrated by `index.ts`
