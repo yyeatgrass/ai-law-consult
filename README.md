@@ -15,7 +15,7 @@ Consultation history and API keys are stored only on your own computer.
 
 ## Install the desktop app
 
-Download the installer for your computer from [Releases](https://github.com/yyeatgrass/law-consult/releases):
+Download the installer for your computer from [Releases](https://github.com/yyeatgrass/ai-law-consult/releases):
 
 | File | For |
 |---|---|

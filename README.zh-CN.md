@@ -15,7 +15,7 @@
 
 ## 安装桌面版
 
-在 [Releases](https://github.com/yyeatgrass/law-consult/releases) 页面下载对应电脑的安装包：
+在 [Releases](https://github.com/yyeatgrass/ai-law-consult/releases) 页面下载对应电脑的安装包：
 
 | 文件 | 适用于 |
 |---|---|
