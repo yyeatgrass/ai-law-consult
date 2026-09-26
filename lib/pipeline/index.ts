@@ -1,8 +1,9 @@
-import type { ApiKeys } from "@/lib/api-keys";
+import type { ResolvedKeys } from "@/lib/api-keys";
 import { formatSituation } from "@/lib/prompts";
 import type { ConsultRequest, ConsultResult, StageEvent } from "@/lib/schemas";
 import { rankClauses, splitClauses } from "@/lib/search/clauses";
-import { searchOfficialSources } from "@/lib/search/tavily";
+import { searchOfficialSources } from "@/lib/search";
+import { SEARCH_PROVIDERS } from "@/lib/search/providers";
 import { analyzeSituation } from "./analyze";
 import { mapToClauses } from "./map";
 import { makeSuggestions } from "./suggest";
@@ -11,7 +12,7 @@ import { verifyClauses } from "./verify";
 export async function runConsultation(
   request: ConsultRequest,
   onStage: (event: StageEvent) => void,
-  { keys, abortSignal }: { keys: ApiKeys; abortSignal?: AbortSignal },
+  { keys, abortSignal }: { keys: ResolvedKeys; abortSignal?: AbortSignal },
 ): Promise<ConsultResult> {
   const situation = formatSituation(request.situation, request.answers);
   const llm = { apiKey: keys.deepseek, abortSignal };
@@ -23,9 +24,12 @@ export async function runConsultation(
 
   onStage({
     stage: "searching",
-    message: `正在官方法律网站检索：${analysis.candidateLaws.slice(0, 3).join("、") || analysis.searchQueries[0]}`,
+    message: `正在通过${SEARCH_PROVIDERS[keys.searchProvider].label}检索官方法律网站：${analysis.candidateLaws.slice(0, 3).join("、") || analysis.searchQueries[0]}`,
   });
-  const docs = await searchOfficialSources(analysis.searchQueries, keys.tavily);
+  const docs = await searchOfficialSources(analysis.searchQueries, {
+    provider: keys.searchProvider,
+    apiKey: keys.searchKey,
+  });
   const allClauses = docs.flatMap(splitClauses);
   const ranked = rankClauses(allClauses, {
     keywords: [...analysis.keywords, ...analysis.legalIssues],

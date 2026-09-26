@@ -10,10 +10,14 @@ type Handlers = {
 
 /** Reads the AI SDK UI message stream (SSE) emitted by /api/consult. */
 export async function consult(body: ConsultRequest, handlers: Handlers, signal?: AbortSignal) {
-  const keys = loadStoredKeys();
+  const settings = loadStoredKeys();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (keys.deepseek) headers[KEY_HEADERS.deepseek] = keys.deepseek;
-  if (keys.tavily) headers[KEY_HEADERS.tavily] = keys.tavily;
+  if (settings.deepseek) headers[KEY_HEADERS.deepseek] = settings.deepseek;
+  if (settings.searchProvider) {
+    headers[KEY_HEADERS.searchProvider] = settings.searchProvider;
+    const searchKey = settings.searchKeys[settings.searchProvider];
+    if (searchKey) headers[KEY_HEADERS.searchKey] = searchKey;
+  }
 
   const res = await fetch("/api/consult", {
     method: "POST",

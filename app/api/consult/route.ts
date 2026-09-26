@@ -1,19 +1,18 @@
 import { createUIMessageStream, createUIMessageStreamResponse, type UIMessage } from "ai";
-import { KEY_HEADERS, type ApiKeys } from "@/lib/api-keys";
 import { runConsultation } from "@/lib/pipeline";
 import { consultRequestSchema, type ConsultResult, type StageEvent } from "@/lib/schemas";
-import { SearchError } from "@/lib/search/tavily";
+import { SearchError } from "@/lib/search";
+import { SEARCH_PROVIDERS } from "@/lib/search/providers";
+import { resolveKeys } from "@/lib/server-keys";
 
 export const maxDuration = 300;
 
 type ConsultMessage = UIMessage<never, { stage: StageEvent; result: ConsultResult }>;
 
 export async function POST(request: Request) {
-  const keys: ApiKeys = {
-    deepseek: request.headers.get(KEY_HEADERS.deepseek)?.trim() || process.env.DEEPSEEK_API_KEY || "",
-    tavily: request.headers.get(KEY_HEADERS.tavily)?.trim() || process.env.TAVILY_API_KEY || "",
-  };
-  const missing = [!keys.deepseek && "DeepSeek", !keys.tavily && "Tavily"].filter(Boolean);
+  const keys = resolveKeys(request.headers);
+  const searchLabel = SEARCH_PROVIDERS[keys.searchProvider].label;
+  const missing = [!keys.deepseek && "DeepSeek", !keys.searchKey && searchLabel].filter(Boolean);
   if (missing.length) {
     return Response.json(
       { error: `缺少 ${missing.join(" 和 ")} API Key，请点击右上角「设置 API Key」填写。`, code: "missing_keys" },
@@ -48,7 +47,8 @@ export async function POST(request: Request) {
 
 function describeError(error: unknown): string {
   if (error instanceof SearchError) {
-    return `官方法律网站检索失败（${error.message}）。请检查 Tavily API Key 是否正确、额度是否用完。`;
+    const label = SEARCH_PROVIDERS[error.provider].label;
+    return `官方法律网站检索失败（${error.message}）。请检查 ${label} API Key 是否正确、余额或额度是否充足，也可以在「设置 API Key」中换一个搜索服务。`;
   }
   const status = providerStatus(error);
   if (status === 401) return "DeepSeek API Key 无效，请点击右上角「设置 API Key」检查后重试。";

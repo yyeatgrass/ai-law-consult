@@ -24,12 +24,17 @@ const LAW_NAME = /(中华人民共和国)?[\u4e00-\u9fa5]{2,30}?(法典|法|条�
 const PASSAGE_SIZE = 800;
 const MAX_CLAUSE_LENGTH = 2000;
 
+const BOOK_TITLE = /《([^》]{2,40})》/;
+
+// The page title is more reliable than the body, which often links to related laws.
 export function inferLawName(title: string, content = ""): string {
-  const bracketed = (title + content.slice(0, 500)).match(/《([^》]{2,40})》/);
-  if (bracketed) return bracketed[1];
+  const titleBracketed = title.match(BOOK_TITLE);
+  if (titleBracketed) return titleBracketed[1];
   const cleanedTitle = title.split(/[_|｜\-—]/)[0].trim();
   const fromTitle = cleanedTitle.match(LAW_NAME);
   if (fromTitle) return fromTitle[0];
+  const contentBracketed = content.slice(0, 500).match(BOOK_TITLE);
+  if (contentBracketed) return contentBracketed[1];
   return cleanedTitle || title;
 }
 

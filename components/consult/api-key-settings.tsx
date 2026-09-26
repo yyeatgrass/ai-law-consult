@@ -13,27 +13,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loadStoredKeys, maskKey, saveStoredKeys, type ApiKeys } from "@/lib/api-keys";
+import { emptySettings, loadStoredKeys, maskKey, saveStoredKeys, type KeySettings } from "@/lib/api-keys";
+import { SEARCH_PROVIDER_IDS, SEARCH_PROVIDERS, type SearchProviderId } from "@/lib/search/providers";
 
-type Provider = keyof ApiKeys;
-type ServerKeys = Record<Provider, boolean>;
+type ServerConfig = {
+  defaultSearchProvider: SearchProviderId;
+  serverKeys: { deepseek: boolean; search: Record<SearchProviderId, boolean> };
+};
 
-const PROVIDERS: { id: Provider; label: string; placeholder: string; getUrl: string; hint: string }[] = [
-  {
-    id: "deepseek",
-    label: "DeepSeek API Key",
-    placeholder: "sk-...",
-    getUrl: "https://platform.deepseek.com/api_keys",
-    hint: "用于分析遭遇、匹配条文和生成建议。账户需有余额。",
-  },
-  {
-    id: "tavily",
-    label: "Tavily API Key",
-    placeholder: "tvly-...",
-    getUrl: "https://app.tavily.com",
-    hint: "用于在官方法律网站检索条文，免费额度即可使用。",
-  },
-];
+const DEFAULT_CONFIG: ServerConfig = {
+  defaultSearchProvider: "tavily",
+  serverKeys: { deepseek: false, search: { tavily: false, bocha: false, zhipu: false } },
+};
 
 export function ApiKeySettings({
   open,
@@ -42,9 +33,9 @@ export function ApiKeySettings({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [stored, setStored] = useState<ApiKeys>({ deepseek: "", tavily: "" });
-  const [draft, setDraft] = useState<ApiKeys>({ deepseek: "", tavily: "" });
-  const [serverKeys, setServerKeys] = useState<ServerKeys>({ deepseek: false, tavily: false });
+  const [stored, setStored] = useState<KeySettings>(emptySettings);
+  const [draft, setDraft] = useState<KeySettings>(emptySettings);
+  const [config, setConfig] = useState<ServerConfig>(DEFAULT_CONFIG);
   const [visible, setVisible] = useState(false);
   const [wasOpen, setWasOpen] = useState(open);
 
@@ -61,16 +52,27 @@ export function ApiKeySettings({
     setStored(loadStoredKeys());
     fetch("/api/config")
       .then((r) => r.json())
-      .then((d) => setServerKeys(d.serverKeys))
+      .then(setConfig)
       .catch(() => {});
   }, []);
 
-  const ready = PROVIDERS.every((p) => stored[p.id] || serverKeys[p.id]);
+  const activeProvider = stored.searchProvider ?? config.defaultSearchProvider;
+  const ready =
+    Boolean(stored.deepseek || config.serverKeys.deepseek) &&
+    Boolean(stored.searchKeys[activeProvider] || config.serverKeys.search[activeProvider]);
 
-  function save(keys: ApiKeys) {
-    saveStoredKeys(keys);
+  const draftProvider = draft.searchProvider ?? config.defaultSearchProvider;
+  const providerInfo = SEARCH_PROVIDERS[draftProvider];
+
+  function save(settings: KeySettings) {
+    saveStoredKeys(settings);
     setStored(loadStoredKeys());
     onOpenChange(false);
+  }
+
+  function currentStatus(storedKey: string, onServer: boolean) {
+    if (storedKey) return `当前：${maskKey(storedKey)}`;
+    return onServer ? "当前：使用服务器配置" : "当前：未设置";
   }
 
   return (
@@ -95,40 +97,58 @@ export function ApiKeySettings({
 
           <form
             id="api-key-form"
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-5"
             onSubmit={(e) => {
               e.preventDefault();
-              save(draft);
+              save({ ...draft, searchProvider: draftProvider });
             }}
           >
-            {PROVIDERS.map((p) => (
-              <div key={p.id} className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor={`key-${p.id}`}>{p.label}</Label>
-                  <a
-                    href={p.getUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            <KeyField
+              id="deepseek"
+              label="DeepSeek API Key"
+              getUrl="https://platform.deepseek.com/api_keys"
+              placeholder={config.serverKeys.deepseek ? "服务器已配置，可留空" : "sk-..."}
+              hint={`用于分析遭遇、匹配条文和生成建议，账户需有余额。${currentStatus(stored.deepseek, config.serverKeys.deepseek)}`}
+              value={draft.deepseek}
+              visible={visible}
+              onChange={(v) => setDraft((d) => ({ ...d, deepseek: v }))}
+            />
+
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">搜索服务</legend>
+              <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1" role="radiogroup">
+                {SEARCH_PROVIDER_IDS.map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="radio"
+                    aria-checked={draftProvider === id}
+                    onClick={() => setDraft((d) => ({ ...d, searchProvider: id }))}
+                    className={`rounded-md px-2 py-1.5 text-sm transition-colors ${
+                      draftProvider === id ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    获取 Key <ExternalLink className="size-3" />
-                  </a>
-                </div>
-                <Input
-                  id={`key-${p.id}`}
-                  type={visible ? "text" : "password"}
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder={serverKeys[p.id] ? "服务器已配置，可留空" : p.placeholder}
-                  value={draft[p.id]}
-                  onChange={(e) => setDraft((d) => ({ ...d, [p.id]: e.target.value }))}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {p.hint}
-                  {stored[p.id] ? ` 当前：${maskKey(stored[p.id])}` : serverKeys[p.id] ? " 当前：使用服务器配置" : " 当前：未设置"}
-                </p>
+                    {SEARCH_PROVIDERS[id].label}
+                    {(stored.searchKeys[id] || config.serverKeys.search[id]) && (
+                      <span className="ml-1 inline-block size-1.5 rounded-full bg-emerald-500 align-middle" />
+                    )}
+                  </button>
+                ))}
               </div>
-            ))}
+              <KeyField
+                id={`search-${draftProvider}`}
+                label={`${providerInfo.label} API Key`}
+                getUrl={providerInfo.getUrl}
+                placeholder={config.serverKeys.search[draftProvider] ? "服务器已配置，可留空" : providerInfo.placeholder}
+                hint={`${providerInfo.hint}${currentStatus(stored.searchKeys[draftProvider], config.serverKeys.search[draftProvider])}`}
+                value={draft.searchKeys[draftProvider]}
+                visible={visible}
+                onChange={(v) =>
+                  setDraft((d) => ({ ...d, searchKeys: { ...d.searchKeys, [draftProvider]: v } }))
+                }
+              />
+            </fieldset>
+
             <Button
               type="button"
               variant="ghost"
@@ -145,8 +165,8 @@ export function ApiKeySettings({
             <Button
               variant="ghost"
               className="sm:mr-auto"
-              disabled={!stored.deepseek && !stored.tavily}
-              onClick={() => save({ deepseek: "", tavily: "" })}
+              disabled={JSON.stringify(stored) === JSON.stringify(emptySettings())}
+              onClick={() => save(emptySettings())}
             >
               清除已保存的 Key
             </Button>
@@ -160,5 +180,51 @@ export function ApiKeySettings({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function KeyField({
+  id,
+  label,
+  getUrl,
+  placeholder,
+  hint,
+  value,
+  visible,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  getUrl: string;
+  placeholder: string;
+  hint: string;
+  value: string;
+  visible: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={`key-${id}`}>{label}</Label>
+        <a
+          href={getUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+        >
+          获取 Key <ExternalLink className="size-3" />
+        </a>
+      </div>
+      <Input
+        id={`key-${id}`}
+        type={visible ? "text" : "password"}
+        autoComplete="off"
+        spellCheck={false}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <p className="text-xs text-muted-foreground">{hint}</p>
+    </div>
   );
 }

@@ -61,6 +61,17 @@ describe("inferLawName", () => {
   it("strips site suffixes from titles", () => {
     expect(inferLawName("中华人民共和国劳动合同法_中国人大网")).toBe("中华人民共和国劳动合同法");
   });
+
+  it("prefers the page title over related laws linked in the body", () => {
+    const body = "相关链接：关于修改《中华人民共和国治安管理处罚法》的决定\n第一条 ……";
+    expect(inferLawName("中华人民共和国治安管理处罚法_中国人大网", body)).toBe("中华人民共和国治安管理处罚法");
+  });
+
+  it("falls back to bracketed names in the body", () => {
+    expect(inferLawName("典型案例发布_最高人民法院", "依据《中华人民共和国民法典》第一千零二十四条")).toBe(
+      "中华人民共和国民法典",
+    );
+  });
 });
 
 describe("rankClauses", () => {

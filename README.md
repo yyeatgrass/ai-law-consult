@@ -3,7 +3,7 @@
 Describe a real-life dilemma (bullying, harassment, unpaid wages, defamation...) in plain Chinese. The app:
 
 1. Analyzes the facts and legal issues (DeepSeek).
-2. Searches official Chinese law sources only (`flk.npc.gov.cn`, `npc.gov.cn`, `gov.cn`, `court.gov.cn`, `spp.gov.cn`, `moj.gov.cn`, `chinacourt.org`) via Tavily, then splits pages into articles (第X条).
+2. Searches official Chinese law sources only (`flk.npc.gov.cn`, `npc.gov.cn`, `gov.cn`, `court.gov.cn`, `spp.gov.cn`, `moj.gov.cn`, `chinacourt.org`) via Tavily, 博查 (Bocha) or 智谱 (Zhipu), downloads the full pages, and splits them into articles (第X条).
 3. Maps your facts to specific articles, and verifies every quote against the fetched source text. Clauses whose quote can't be found are marked "未能核实".
 4. Gives concrete next steps: evidence, who to contact, deadlines, possible claims.
 
@@ -11,7 +11,15 @@ History is stored only in the browser's `localStorage`.
 
 ## Setup
 
-You need a [DeepSeek](https://platform.deepseek.com/api_keys) and a [Tavily](https://app.tavily.com) API key. Either:
+You need a [DeepSeek](https://platform.deepseek.com/api_keys) API key plus a key for one search service:
+
+| Service | Notes |
+|---|---|
+| [Tavily](https://app.tavily.com) | ~1000 free credits/month; returns full page text |
+| [博查 Bocha](https://open.bochaai.com) | Domestic; one request covers all official domains; ~¥0.036/call |
+| [智谱 Zhipu](https://bigmodel.cn/usercenter/proj-mgmt/apikeys) | Domestic; filters one domain per request, so it makes two calls per query; ~¥0.03/call |
+
+Either:
 
 - click **设置 API Key** in the app header (keys are stored in your browser's `localStorage` and sent to this app's server with each request), or
 - put them in `.env.local` (`cp .env.example .env.local`) as server-wide defaults. Keys set in the browser take precedence.
@@ -25,7 +33,7 @@ npm test                     # unit tests for clause splitting and quote verific
 ## Layout
 
 - `lib/pipeline/` — `analyze` → search → `map` → `verify` → `suggest`, orchestrated by `index.ts`
-- `lib/search/` — Tavily official-domain search (`tavily.ts`) and article splitter/ranker (`clauses.ts`)
+- `lib/search/` — search orchestration (`index.ts`), one adapter per provider (`engines/`), official page fetcher (`fetch-page.ts`), and article splitter/ranker (`clauses.ts`)
 - `app/api/consult/route.ts` — streams stage progress and the final result (AI SDK UI message stream)
 - `components/consult/` — UI
 
